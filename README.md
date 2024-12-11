@@ -9,10 +9,11 @@ or
 python atcgtools.py [analysistype]
 
 
-atcgtools [analysistype]={countgaps,inittopleveltable,fillcontextNoutgroup,VJtransf,VJgendadi,Detectsignalacrossgenome,VCataAnno,test}
+atcgtools [analysistype] [parameters for different analysistype]
 
-[analysistype]
+[analysistype]={countgaps,inittopleveltable,fillcontextNoutgroup,VJtransf,VJgendadi,Detectsignalacrossgenome,VCataAnno,test}
  VJtransf：
+ 
  convert vcf into which format depands on -f 
  pedmap (default): map ped plink format (if -r is proviede, final map ped file only contian unlinked sites that r2 less than value -r assigned )
  genosnp:
@@ -23,11 +24,12 @@ atcgtools [analysistype]={countgaps,inittopleveltable,fillcontextNoutgroup,VJtra
  )
  
  inittopleveltable:
- 	create the toplevel variants table for a species and load SNP/INDEL records of allindividuals.vcf into the table.
- 	after this step, toplevel talbe in mysql databases contain the following fields:chrID,snp_pos,snpID,ref_allele,context,alt_alle1,alt_alleN,presenceflag
- 	ref_allele corresponding the 4th(REF) col of the input vcf file and context contain the flank bases of both side of the SNP, empty for INDEL.
- 	alt_alle1 conrresponding to the first allele of the 5th(ALT) of the input vcf file and the rest alternated allele will be stored in alt_alleN col.
- 	presenceflag, which is paticularly noteworthy. it's a two bits flag. from right(least significant bit) to left, every to bits represent the variant state of the corresponding population,which is assigned in config.propoties file.
+ 
+ create the toplevel variants table for a species and load SNP/INDEL records of allindividuals.vcf into the table.
+ after this step, toplevel talbe in mysql databases contain the following fields:chrID,snp_pos,snpID,ref_allele,context,alt_alle1,alt_alleN,presenceflag
+ ref_allele corresponding the 4th(REF) col of the input vcf file and context contain the flank bases of both side of the SNP, empty for INDEL.
+ alt_alle1 conrresponding to the first allele of the 5th(ALT) of the input vcf file and the rest alternated allele will be stored in alt_alleN col.
+ presenceflag, which is paticularly noteworthy. it's a two bits flag. from right(least significant bit) to left, every to bits represent the variant state of the corresponding population,which is assigned in config.propoties file.
  	
  As the SNPs will vary when different populations/individuals used to call, the input vcf here better use as comprehensive an individual/population set as possible. 
  Whereas joint too many individuals/populations to call SNP may supper time consuming, So our solutions consists of two aspects:
