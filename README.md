@@ -6,22 +6,23 @@ chmod +x atcgtools
 run directly:
 atcgtools -h
 or 
-python atcgtools.py
+python atcgtools.py [analysistype]
 
 
-atcgtools: {countgaps,inittopleveltable,fillcontextNoutgroup,VJtransf,VJgendadi,Detectsignalacrossgenome,VCataAnno,test}
+atcgtools [analysistype]={countgaps,inittopleveltable,fillcontextNoutgroup,VJtransf,VJgendadi,Detectsignalacrossgenome,VCataAnno,test}
 
- VJtransf
+[analysistype]
+ VJtransf：
  convert vcf into which format depands on -f 
  pedmap (default): map ped plink format (if -r is proviede, final map ped file only contian unlinked sites that r2 less than value -r assigned )
  genosnp:
-[ most functions below require a special designed mysql/mariandb table that cantains all SNPs of the species and the state of the polymorphism in each populations/breeds for each SNPs, 
+( most functions below require a special designed mysql/mariandb table that cantains all SNPs of the species and the state of the polymorphism in each populations/breeds for each SNPs, 
   and the outgroup genotype information to determine the ancestral allele. This can be done by the following two steps:
  atcgtools inittopleveltable allindividuals.vcf
  atcgtools fillcontextNoutgroup 
- ]
+ )
  
- inittopleveltable
+ inittopleveltable:
  	create the toplevel variants table for a species and load SNP/INDEL records of allindividuals.vcf into the table.
  	after this step, toplevel talbe in mysql databases contain the following fields:chrID,snp_pos,snpID,ref_allele,context,alt_alle1,alt_alleN,presenceflag
  	ref_allele corresponding the 4th(REF) col of the input vcf file and context contain the flank bases of both side of the SNP, empty for INDEL.
