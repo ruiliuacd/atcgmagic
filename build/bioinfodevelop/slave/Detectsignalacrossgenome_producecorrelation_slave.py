@@ -19,17 +19,17 @@ parser.add_option("-c","--chromlistfilename",dest="chromlistfilename")
 parser.add_option("-n","--numberofindvdoftargetpop_todividintobin",dest="numberofindvdoftargetpop_todividintobin",default="o",help="conflit with correlationfile")
 parser.add_option("-o","--outfileprewithpath",dest="outfileprewithpath")
 (options, args) = parser.parse_args()
-
+mindepthtojudefixed=20
 seqerrorrate=0.008;outgroupidx_in_topleveltable=[8,10]#outgidx=7;outg2idx=9
 def make_freq_xaxisKEY_yaxisseqVALUERelation(a):
     chromlistfilename=a[0];topleveltablename=a[1];targetpopvcffile_withdepthconfig=a[2];refpopvcffile_withdepthconfig=a[3];numberofindvdoftargetpop_todividintobin=int(a[4])
-    mindepthtojudefixed=20
+    mindepthtojudefixed=mindepthtojudefixed
     d_increase=fractions.Fraction(1, (2*int(numberofindvdoftargetpop_todividintobin)))
     d_increase=round(d_increase,11)
     minvalue=0.000000000000
     freq_xaxisKEY_yaxisVALUE_seq_list={}
     for i in range(numberofindvdoftargetpop_todividintobin*2-1):
-        freq_xaxisKEY_yaxisVALUE_seq_list[(minvalue,minvalue+d_increase+0.00000000004)]=[]
+        freq_xaxisKEY_yaxisVALUE_seq_list[(minvalue,minvalue+d_increase+0.00000000002)]=[]
         minvalue+=d_increase
     else:
         freq_xaxisKEY_yaxisVALUE_seq_list[(minvalue,1)]=[]
@@ -114,7 +114,11 @@ def make_freq_xaxisKEY_yaxisseqVALUERelation(a):
 #                 else:
 # #                     print("UNKNOWN ANCESTRALL",snp[0][1],snp[0][7:])
 #                     continue
-            ancestrallcontext=snp[0][4].strip()[0].upper()+snp[0][3+A_base_idx*2].strip().upper()+snp[0][4].strip()[2].upper()
+            try:
+                ancestrallcontext=snp[0][4].strip()[0].upper()+snp[0][3+A_base_idx*2].strip().upper()+snp[0][4].strip()[2].upper()
+            except Exception as e:
+                print(f"error catched: {e}",snp)
+                continue
             if "CG" in ancestrallcontext or "GC" in ancestrallcontext:
 #                 print("skip CG site",ancestrallcontext)
                 continue

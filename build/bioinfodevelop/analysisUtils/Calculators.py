@@ -1313,62 +1313,65 @@ class Caculate_S_ObsExp_difference(Caculator):
 #                 print("skip snp",snp[0][1],snp[0][7],snp[0][9],snp[0][11],snp[0][13])
                 return
         """
-
-        ancestrallcontext=snprec_in_toplevel[0][4].strip().upper()#equal to  snprec_in_toplevel[0][4].strip()[0].upper()+snprec_in_toplevel[0][3+A_base_idx*2].strip().upper()+snprec_in_toplevel[0][4].strip()[2].upper()
-        if "CG" in ancestrallcontext or "GC" in ancestrallcontext:
-#             print("skip CG site",ancestrallcontext)
-            return
-        ##########x-axis
-        countedAF=0;target_DAF_sum=0
-        for tpopidx in range(3,self.N_of_targetpop+3):
-            if T[tpopidx]==None:
-                if len(self.vcfnameKEY_vcfobj_pyBAMfilesVALUE[self.vcfnamelist[tpopidx-3]])==1:
-#                     print("skip this pos",T)
-                    continue
-                else:
-#                     depth_linelist=self.depthobjlist[tpopidx-3].getdepthByPos_optimized(self.currentchrID,T[0])
-                    sum_depth=0
-                    for samfile in self.vcfnameKEY_vcfobj_pyBAMfilesVALUE[self.vcfnamelist[tpopidx-3]][1:]:
-                        ACGTdep=samfile.count_coverage(self.currentchrID,T[0]-1,T[0])
-                        for dep in ACGTdep:
-                            sum_depth+=dep[0]
-#                     for idx in self.species_idx_list[tpopidx-3][:]:
-#                         sum_depth+=int(depth_linelist[idx])
-                    if sum_depth>self.mindepthtojudefixed:
-                        AF=0
+        try:
+            ancestrallcontext=snprec_in_toplevel[0][4].strip().upper()#equal to  snprec_in_toplevel[0][4].strip()[0].upper()+snprec_in_toplevel[0][3+A_base_idx*2].strip().upper()+snprec_in_toplevel[0][4].strip()[2].upper()
+            if "CG" in ancestrallcontext or "GC" in ancestrallcontext:
+    #             print("skip CG site",ancestrallcontext)
+                return
+            ##########x-axis
+            countedAF=0;target_DAF_sum=0
+            for tpopidx in range(3,self.N_of_targetpop+3):
+                if T[tpopidx]==None:
+                    if len(self.vcfnameKEY_vcfobj_pyBAMfilesVALUE[self.vcfnamelist[tpopidx-3]])==1:
+    #                     print("skip this pos",T)
+                        continue
                     else:
-#                         print(sum_depth,"low coverage skip")
-                        continue
-            else:
-                if self.MethodToSeqpoplist[tpopidx-3]=="indvd":
-                    AF=float(re.search(r"AF=([\d\.e-]+)[;,]", T[tpopidx][0]).group(1))
-                    AN = float(re.search(r"AN=([\d]+)[;,]", T[tpopidx][0]).group(1))
-                    if AN<5:
-                        continue
-                elif self.MethodToSeqpoplist[tpopidx-3]=="pool":
-                    refdep = 0;altalleledep = 0
-                    AD_idx = (re.split(":", T[tpopidx][1])).index("AD")
-                    for sample in T[tpopidx][2]:
-                        if len(re.split(":", sample)) == 1:  # ./.
+    #                     depth_linelist=self.depthobjlist[tpopidx-3].getdepthByPos_optimized(self.currentchrID,T[0])
+                        sum_depth=0
+                        for samfile in self.vcfnameKEY_vcfobj_pyBAMfilesVALUE[self.vcfnamelist[tpopidx-3]][1:]:
+                            ACGTdep=samfile.count_coverage(self.currentchrID,T[0]-1,T[0])
+                            for dep in ACGTdep:
+                                sum_depth+=dep[0]
+    #                     for idx in self.species_idx_list[tpopidx-3][:]:
+    #                         sum_depth+=int(depth_linelist[idx])
+                        if sum_depth>self.mindepthtojudefixed:
+                            AF=0
+                        else:
+    #                         print(sum_depth,"low coverage skip")
                             continue
-                        AD_depth = re.split(",", re.split(":", sample)[AD_idx])
-                        try :
-                            refdep += int(AD_depth[0])
-                            altalleledep += int(AD_depth[1])
-                        except ValueError:
-                            print(sample, end="|")
-                    if (refdep==altalleledep and altalleledep==0) or altalleledep+ refdep<10:
-                        continue
-                    AF=altalleledep/(altalleledep+refdep)
-            if A_base_idx==0:
-                DAF=1-AF
-            elif A_base_idx==1:
-                DAF=AF
-            target_DAF_sum+=DAF;countedAF+=1
-        if  countedAF==0 or target_DAF_sum/countedAF==0:#:
-#             print("skip this snp,because it fiexd as ancestral or no covered in this pos in target pops",T,snp)
+                else:
+                    if self.MethodToSeqpoplist[tpopidx-3]=="indvd":
+                        AF=float(re.search(r"AF=([\d\.e-]+)[;,]", T[tpopidx][0]).group(1))
+                        AN = float(re.search(r"AN=([\d]+)[;,]", T[tpopidx][0]).group(1))
+                        if AN<5:
+                            continue
+                    elif self.MethodToSeqpoplist[tpopidx-3]=="pool":
+                        refdep = 0;altalleledep = 0
+                        AD_idx = (re.split(":", T[tpopidx][1])).index("AD")
+                        for sample in T[tpopidx][2]:
+                            if len(re.split(":", sample)) == 1:  # ./.
+                                continue
+                            AD_depth = re.split(",", re.split(":", sample)[AD_idx])
+                            try :
+                                refdep += int(AD_depth[0])
+                                altalleledep += int(AD_depth[1])
+                            except ValueError:
+                                print(sample, end="|")
+                        if (refdep==altalleledep and altalleledep==0) or altalleledep+ refdep<10:
+                            continue
+                        AF=altalleledep/(altalleledep+refdep)
+                if A_base_idx==0:
+                    DAF=1-AF
+                elif A_base_idx==1:
+                    DAF=AF
+                target_DAF_sum+=DAF;countedAF+=1
+            if  countedAF==0 or target_DAF_sum/countedAF==0:#:
+    #             print("skip this snp,because it fiexd as ancestral or no covered in this pos in target pops",T,snp)
+                return
+            target_DAF=target_DAF_sum/countedAF
+        except Exception as e:
+            print(f"error catched: {e}")
             return
-        target_DAF=target_DAF_sum/countedAF
         #########y-axis
         countedAF=0;rer_DAF_sum=0
         for rpopidx in range(3+self.N_of_targetpop,self.N_of_refpop+self.N_of_targetpop+3):
