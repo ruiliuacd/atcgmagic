@@ -41,7 +41,9 @@ atcgtools [analysistype] [parameters for different analysistype]
 	Different suffix names .vcf or .VCFBAMconfig enable different behaviours correspondingly. when multiple -v is used, should use .VCFBAMconfig as input as it is nesscery to align records.
 	
  -r optional. Conflict with -i. If provided, the output will filter out those linked sites by invoking plink --indep-pairwise 100(default) 20(default) 0.5
+ 
  -i optional. Conflict with -r.
+ 
  -m group information file. 
  	
   	# in above example, all8popfile.indpop file contain three essential columns and could with additional columns to group differently. the second argument of -m specifies  which column to use as the group info.
@@ -53,8 +55,10 @@ atcgtools [analysistype] [parameters for different analysistype]
  	#shaoxing_SRR6323918     U       shaoxing        domestic
  	#beijing_41224_42        U       beijing domestic
 	#beijing_41288_44        U       beijing domestic
- -t optional. better
+ -t optional. Specifies how many chromosomes will be processed simultaneously using multiple processes. Better assign as many as possible to get results faster.
+ 
  -c optional. if provided, the out put's chromosome ID will be replace by the corresponding name according this file.
+ 
  -o output file prefix name
  	
  VJgendadi: similar to VJtransf, but requiring a special designed mysql table with flank sequences and outgroup genotype info of each SNPs.
@@ -88,7 +92,7 @@ atcgtools [analysistype] [parameters for different analysistype]
  subclasses Caculate_popPI,Caculate_popDiv,Caculate_Fst,Caculate_ABB_BAB_BBAA,Caculate_df,Caculate_Hp_master_slave,Caculate_S_ObsExp_difference were used to
  calculate pi,dxy,Fst,abbabaab,df,Hp,SDS that selection occured in ancient, respectively.
 	
-	e.g. atcgtools Detectsignalacrossgenome -T spotbilled.VCFBAMconfig -T ~/avian/duckpop/configfiles/mallardZJU1.VCFBAMconfig -o EarlyseletedRegion_auto -R ~/avian/duckpop/configfiles/beijing.VCFBAMconfig -R ~/avian/duckpop/configfiles/shaoxing.VCFBAMconfig -R ~/avian/duckpop/configfiles/newdomesticbreeds.VCFBAMconfig -R ~/avian/duckpop/configfiles/gy.VCFBAMconfig -R ~/avian/duckpop/configfiles/sm.VCFBAMconfig -R ~/avian/duckpop/configfiles/jd.VCFBAMconfig -R ~/avian/duckpop/configfiles/cv.VCFBAMconfig -R ~/avian/duckpop/configfiles/campbell.VCFBAMconfig -n 24 -p early -t toplevelDuck_ZJU1ref -w 20000 -s 10000 -1 /home/lrui/BDRobot/src/bioinfodevelop/slave/Detectsignalacrossgenome_producecorrelation_slave.py -2 /home/lrui/BDRobot/src/bioinfodevelop/slave/Detectsignalacrossgenome_slidewin_slave.py -c auto
+	e.g. atcgtools Detectsignalacrossgenome -T spotbilled.VCFBAMconfig -T configfiles/mallardZJU1.VCFBAMconfig -o EarlyseletedRegion_auto -R configfiles/beijing.VCFBAMconfig -R configfiles/shaoxing.VCFBAMconfig -R configfiles/newdomesticbreeds.VCFBAMconfig -R configfiles/gy.VCFBAMconfig -R configfiles/sm.VCFBAMconfig -R configfiles/jd.VCFBAMconfig -R configfiles/cv.VCFBAMconfig -R configfiles/campbell.VCFBAMconfig -n 24 -p early -t toplevelDuck_ZJU1ref -w 20000 -s 10000 -1 build/bioinfodevelop/slave/Detectsignalacrossgenome_producecorrelation_slave.py -2 build/bioinfodevelop/slave/Detectsignalacrossgenome_slidewin_slave.py -c auto
 
  VCataAnno
 	
