@@ -78,7 +78,7 @@ def distMatrix(numArray):
         for j in range(i + 1, N):
             distMat[i,j] = distMat[j,i] = numHamming(numArray[i,:], numArray[j,:])
     return distMat
-class Caculate_popDiv(Caculator):
+class Calculate_popDiv(Caculator):
     def __init__(self,considerINDEL,tvcfconfig,rvcfconfig,outputname):
         super().__init__()
         self.outputname=outputname
@@ -136,7 +136,7 @@ class Caculate_popDiv(Caculator):
             return
         site=[]#should have 
         AN=AC=0
-        for popidx in range(3,5):
+        for popidx in range(3,5):# for population1 and population2
             if T[popidx]==None:
                 # check depth ,if passed treat as fix as ref
                 if len(self.vcfnameKEY_vcfobj_pyBAMfilesVALUE[self.vcfnamelist[popidx-3]])==1:
@@ -190,7 +190,7 @@ class Caculate_popDiv(Caculator):
             self.array = np.array([list(seq) for seq in pseudoPhasedSeqs])
             self.numArray = np.array([[numSeqDict[b] for b in seq] for seq in pseudoPhasedSeqs])
         else:
-            self.array = np.empty((0,self.N))
+            self.array = np.empty((0,self.N))#same with 2N
             self.numArray = np.empty((0,self.N))
         self.nanMask = ~np.isnan(self.numArray)
         #get distMatrix
@@ -203,7 +203,7 @@ class Caculate_popDiv(Caculator):
         self.numArray=[]
         self.array=[]
         return Nsites, dxy
-class Caculate_popPI(Caculator):
+class Calculate_popPI(Caculator):
     def __init__(self,considerINDEL,tvcfconfig,outputname):
         super().__init__()
         self.outputname=outputname
@@ -328,7 +328,7 @@ class Caculate_popPI(Caculator):
         self.numArray=[]
         self.array=[]
         return Nsites, pi
-class Caculate_SNPsPerBIN(Caculator):
+class Calculate_SNPsPerBIN(Caculator):
     def __init__(self, winwidth, considerINDEL="no", MethodToSeq="pool"):
         self.considerINDEL = considerINDEL.lower()
         self.winwidth = winwidth
@@ -385,7 +385,7 @@ def binFreqs(numArr):
     n = len(numArr)
     if n == 0: return np.array([np.NaN]*4)
     else: return 1.* np.bincount(numArr, minlength=4) / n
-class Caculate_ABB_BAB_BBAA(Caculator):
+class Calculate_ABB_BAB_BBAA(Caculator):
     def __init__(self,considerINDEL,p1vcfconfig,p2vcfconfig,p3vcfconfig,Ovcfconfig,outputname,cpid,pseudoPoolAN):
         super().__init__()
         self.outputname=outputname
@@ -665,7 +665,7 @@ class Caculate_Dstatistics(Caculator):
         self.numerator_snp = 0;self.denominator_snp = 0;noofsnps = copy.deepcopy(self.COUNTEDforSNP_notonlyfixed);self.COUNTEDforSNP_notonlyfixed = 0
         return ABBAcount, BABAcount, D_fixed, D_snp, noofsnps
         
-class Caculate_df(Caculator):
+class Calculate_df(Caculator):
     def __init__(self,pop1idxlist,pop2idxlist,filehanlder):
         super().__init__()
         self.pop1idxlist=pop1idxlist
@@ -728,7 +728,7 @@ class Caculate_df(Caculator):
         self.COUNTEDadditional=[0,[0,0]]
         self.unsufficentfixediff=0
         return [noofhet,(pop1unsufficentfixed,pop2unsufficentfixed)],nooffixediff #self.COUNTEDadditional,self.COUNTED
-class Caculate_Hp_master_slave(Caculator):
+class Calculate_Hp_master_slave(Caculator):
     def __init__(self, listOftargetpopvcfconfig,outfileprewithpath, minsnps=10,depth=10):
         super().__init__()
         self.minsnps = minsnps
@@ -1232,7 +1232,7 @@ class Caculate_Fst(Caculator):
         if noofsnp<self.minsnps:
             Fst="NA"
         return [noofsnp,nooffixdifference], Fst
-class Caculate_S_ObsExp_difference(Caculator):
+class Calculate_S_ObsExp_difference(Caculator):
     def __init__(self,mindepthtojudefixed,listOftargetpopvcfconfig,listOfrefpopvcffileconfig,dbvariantstoolstojudgeancestral,toplevelTablejudgeancestralname,outfileprewithpath):
         super().__init__()
         self.dbvariantstoolstojudgeancestral=dbvariantstoolstojudgeancestral
@@ -1294,7 +1294,7 @@ class Caculate_S_ObsExp_difference(Caculator):
         if Anc_base_idx[0] :
             A_base_idx=Anc_base_idx[1]
         else:
-            self.alignedSNP_absentinfo[self.currentchrID].append(T)
+            if not snprec_in_toplevel or (len(snprec_in_toplevel[0][3])==1 and (not snprec_in_toplevel[0][outgroupidx_in_topleveltable[0]] or not snprec_in_toplevel[0][4].strip().upper()) ):self.alignedSNP_absentinfo[self.currentchrID].append(T)
             return
         """
         if not snp or  snp[0][outgidx]==None or snp[0][outg2idx]==None or snp[0][5]==None:#needed info of SNPs are absent, snp[0][9] and snp[0][5] are dependent on the fellow code segment
@@ -1370,7 +1370,7 @@ class Caculate_S_ObsExp_difference(Caculator):
                 return
             target_DAF=target_DAF_sum/countedAF
         except Exception as e:
-            print(f"error catched: {e}")
+            print(f"error catched: {e}",snprec_in_toplevel,T)
             return
         #########y-axis
         countedAF=0;rer_DAF_sum=0
@@ -1433,14 +1433,15 @@ class Caculate_S_ObsExp_difference(Caculator):
         if self.alignedSNP_absentinfo[self.currentchrID]!=[]:
             self.dynamicIU_toptable_obj.insertorUpdatetopleveltable(self.alignedSNP_absentinfo,self.flankseqfafile,50)
             No_Of_snpT=len(self.alignedSNP_absentinfo[self.currentchrID])
-            print("self.CEXP SNP sites before process",len(self.CEXP))
-            for whatever in range(No_Of_snpT):
+            print("dynamic insert/update db variants table\n#SNP in self.CEXP   before update/insert",self.COUNT,"=",len(self.CEXP),",absentinfo:",len(self.alignedSNP_absentinfo[self.currentchrID]))
+            for i in range(No_Of_snpT):
                 snpT=self.alignedSNP_absentinfo[self.currentchrID].pop(0)
 #                     print(snpT,len(self.alignedSNP_absentinfo[chrom]))
-                print(snpT[0:3],"process",len(self.alignedSNP_absentinfo[self.currentchrID]),self.COUNT)
+                print("retry each:"*(i==0),snpT[0:3],"#SNP in self.CEXP after each retry->"*(i==0),len(self.CEXP),end=",")
                 self.process(snpT)
-            if len(self.alignedSNP_absentinfo[self.currentchrID])!=0:print("length of snpT",len(self.alignedSNP_absentinfo[self.currentchrID]));self.alignedSNP_absentinfo[self.currentchrID]=[]
-            print("self.CEXP SNP sites processed",len(self.CEXP))    
+            if len(self.alignedSNP_absentinfo[self.currentchrID])!=0:
+                print("\n#snpT remaining can't update/insert",len(self.alignedSNP_absentinfo[self.currentchrID]));self.alignedSNP_absentinfo[self.currentchrID]=[]
+            print("#SNP in self.CEXP after reprocess",len(self.CEXP))    
         S1=0
         S2="NA"
         noofsnp=self.COUNT

@@ -57,7 +57,7 @@ if __name__ == '__main__':
         flankseqfafilename = aaaaaaa + str(os.getpid()) + "snpflankseq.fa"
         dbvariantstools = dbm.DBTools(config.ip, config.username, config.password, config.variantsdbname)
         dynamicIU_toptable_obj = variantUtils.dynamicInsertUpdateAncestralContext(dbvariantstools, config.beijingreffa, options.topleveltablejudgeancestral)
-        obsexpcaculator = Calculators.Caculate_S_ObsExp_difference(mindeptojudgefix, options.targetpopvcfconfig, options.refpopvcffileconfig, dbvariantstools, options.topleveltablejudgeancestral, options.outfileprewithpath)
+        obsexpcaculator = Calculators.Calculate_S_ObsExp_difference(mindeptojudgefix, options.targetpopvcfconfig, options.refpopvcffileconfig, dbvariantstools, options.topleveltablejudgeancestral, options.outfileprewithpath)
         obsexpcaculator.dynamicIU_toptable_obj = dynamicIU_toptable_obj
         obsexpcaculator.flankseqfafile = open(flankseqfafilename, "w")
         plainname = re.search(r"[^/]*$", obsexpcaculator.outputname).group(0)
@@ -79,13 +79,13 @@ if __name__ == '__main__':
         obsexpcaculator.freq_xaxisKEY_yaxisVALUERelation = final_freq_xaxisKEY_yaxisVALUERelation
         freq_correlation_config.close()
     elif options.typeOfcalculate=="D":
-        obsexpcaculator=Calculators.Caculate_ABB_BAB_BBAA("no",options.targetpopvcfconfig,options.P2popvcfconfig,options.P3popvcfconfig,options.refpopvcffileconfig,options.outfileprewithpath,os.getpid(),30)    
+        obsexpcaculator=Calculators.Calculate_ABB_BAB_BBAA("no",options.targetpopvcfconfig,options.P2popvcfconfig,options.P3popvcfconfig,options.refpopvcffileconfig,options.outfileprewithpath,os.getpid(),30)    
         outputname=options.outfileprewithpath
         outfile=open(outputname+"."+options.typeOfcalculate + str(windowWidth) + "_" + str(slideSize) + str(os.getpid()) + chrlistfilewithoutpath,"w")
         print("chrNo\twinNo\tfirstsnppos\tlastsnppos\tnoofsnp\twinvalue\tzvalue", file=outfile)
     elif options.typeOfcalculate == "pairfst" or options.typeOfcalculate == "dxy":
 #         obsexpcaculator = Caculators.Caculate_pairFst(mindeptojudgefix, options.targetpopvcfconfig, options.refpopvcffileconfig)
-        obsexpcaculator = Calculators.Caculate_popDiv("no",options.targetpopvcfconfig, options.refpopvcffileconfig,options.outfileprewithpath)
+        obsexpcaculator = Calculators.Calculate_popDiv("no",options.targetpopvcfconfig, options.refpopvcffileconfig,options.outfileprewithpath)
         plainname = re.search(r"[^/]*$", obsexpcaculator.outputname).group(0)
         if len(plainname) >= 250:
             outputname = obsexpcaculator.outputname[:-(len(plainname) - 250)]
@@ -102,7 +102,7 @@ if __name__ == '__main__':
         outfile = open(outputname + "." + options.typeOfcalculate + str(windowWidth) + "_" + str(slideSize) + str(os.getpid()) + chrlistfilewithoutpath, 'w')
         print("chrNo\twinNo\tfirstsnppos\tlastsnppos", *obsexpcaculator.vcfname_combination, sep="\t", file=outfile)
     elif options.typeOfcalculate == "hp" or options.typeOfcalculate == "pi":
-        obsexpcaculator = Calculators.Caculate_Hp_master_slave(options.targetpopvcfconfig, options.outfileprewithpath, minsnps=0) if options.typeOfcalculate == "hp" else Calculators.Caculate_popPI(options.targetpopvcfconfig, options.outfileprewithpath, minsnps=0)
+        obsexpcaculator = Calculators.Calculate_Hp_master_slave(options.targetpopvcfconfig, options.outfileprewithpath, minsnps=0) if options.typeOfcalculate == "hp" else Calculators.Calculate_popPI(options.targetpopvcfconfig, options.outfileprewithpath, minsnps=0)
         plainname = re.search(r"[^/]*$", options.outfileprewithpath).group(0)
         if len(plainname) >= 250:
             outputname = options.outfileprewithpath[:-(len(plainname) - 250)]
@@ -126,54 +126,58 @@ if __name__ == '__main__':
             currentchrLen = int(genomedbtools.operateDB("select", "select * from " + mysqlchromtable + " where chrID='" + currentchrID + "' ")[0][1])
         else:
             currentchrLen = currentchrLenOrRegion
-        for vcfname in obsexpcaculator.vcfnamelist:
-            vcfobj = obsexpcaculator.vcfnameKEY_vcfobj_pyBAMfilesVALUE[vcfname][0]
-#         for vcfobj in poplist:
-            if currentchrID in vcfobj.VcfIndexMap:
-                break
-        else:
-            print("this chr doesn't exist in anypop")
-            fillNA = obsexpcaculator.getResult()  # [(0,0,0,'NA')]
-            if isinstance(currentchrLenOrRegion, tuple) and currentchrLenOrRegion[1] + extendsize < currentchrLen:
-                fillsize_End = currentchrLenOrRegion[1] + extendsize
+        try:
+            for vcfname in obsexpcaculator.vcfnamelist:
+                vcfobj = obsexpcaculator.vcfnameKEY_vcfobj_pyBAMfilesVALUE[vcfname][0]
+    #         for vcfobj in poplist:
+                if currentchrID in vcfobj.VcfIndexMap:
+                    break
             else:
-                fillsize_End = currentchrLen
-            if isinstance(currentchrLenOrRegion, tuple) and currentchrLenOrRegion[0] - extendsize > 0:
-                fillsize_Start = currentchrLenOrRegion[0] - extendsize
-            else:
-                fillsize_Start = 0
-            for i in range(int((fillsize_End - fillsize_Start) / slideSize)):
-                t = obsexpcaculator.getResult()
-                t[0] = i * slideSize + fillsize_Start
-                t[1] = i * slideSize + windowWidth + fillsize_Start
-                fillNA.append(t)  # (0,0,0,'NA')
-            obsexpsignalmapbychrom[currentchrID] = fillNA
-            continue
-        # this chr exist in one of the vcffile,then alinmultPopSnpPos
-#         for vcfobj_idx in range(len(poplist)):
-        for vcfobj_idx in range(len(obsexpcaculator.vcfnamelist)):
-            obsexpcaculator.listOfpopvcfRecsmapByAChr[vcfobj_idx] = {}
-            vcfobj = obsexpcaculator.vcfnameKEY_vcfobj_pyBAMfilesVALUE[obsexpcaculator.vcfnamelist[vcfobj_idx]][0]
-            print(obsexpcaculator.vcfnamelist[vcfobj_idx], "getvcf")
+                print("this chr doesn't exist in anypop")
+                fillNA = [(0,0,*obsexpcaculator.getResult())]  # [(0,0,0,'NA')]
+                if isinstance(currentchrLenOrRegion, tuple) and currentchrLenOrRegion[1] + extendsize < currentchrLen:
+                    fillsize_End = currentchrLenOrRegion[1] + extendsize
+                else:
+                    fillsize_End = currentchrLen
+                if isinstance(currentchrLenOrRegion, tuple) and currentchrLenOrRegion[0] - extendsize > 0:
+                    fillsize_Start = currentchrLenOrRegion[0] - extendsize
+                else:
+                    fillsize_Start = 0
+                for i in range(int((fillsize_End - fillsize_Start) / slideSize)):
+                    noofsnp,t = obsexpcaculator.getResult()
+                    s = i * slideSize + fillsize_Start
+                    e = i * slideSize + windowWidth + fillsize_Start
+                    fillNA.append((s,e,noofsnp,t))  # (0,0,0,'NA')
+                obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)] = fillNA
+                continue
+            # this chr exist in one of the vcffile,then alinmultPopSnpPos
+    #         for vcfobj_idx in range(len(poplist)):
+            for vcfobj_idx in range(len(obsexpcaculator.vcfnamelist)):
+                obsexpcaculator.listOfpopvcfRecsmapByAChr[vcfobj_idx] = {}
+                vcfobj = obsexpcaculator.vcfnameKEY_vcfobj_pyBAMfilesVALUE[obsexpcaculator.vcfnamelist[vcfobj_idx]][0]
+                print(obsexpcaculator.vcfnamelist[vcfobj_idx], "getvcf")
+                if isinstance(currentchrLenOrRegion, tuple):  # bedfile
+                    obsexpcaculator.listOfpopvcfRecsmapByAChr[vcfobj_idx][currentchrID] = vcfobj.getVcfListByChrom(currentchrID, currentchrLenOrRegion[0] - extendsize, currentchrLenOrRegion[1] + extendsize)
+                else:  # chrom
+                    obsexpcaculator.listOfpopvcfRecsmapByAChr[vcfobj_idx][currentchrID] = vcfobj.getVcfListByChrom(currentchrID)
+            target_ref_SNPs = variantUtils.alignmultPopSnpPos(obsexpcaculator.listOfpopvcfRecsmapByAChr, "o",None,False)
+            obsexpcaculator.currentchrID = currentchrID
+            if options.typeOfcalculate == "early":
+                obsexpcaculator.dynamicIU_toptable_obj.currentchrLen = currentchrLen
+                obsexpcaculator.alignedSNP_absentinfo = {}
+                obsexpcaculator.alignedSNP_absentinfo[currentchrID] = []
+            ##########
+            print(len(target_ref_SNPs[currentchrID]))
             if isinstance(currentchrLenOrRegion, tuple):  # bedfile
-                obsexpcaculator.listOfpopvcfRecsmapByAChr[vcfobj_idx][currentchrID] = vcfobj.getVcfListByChrom(currentchrID, currentchrLenOrRegion[0] - extendsize, currentchrLenOrRegion[1] + extendsize)
-            else:  # chrom
-                obsexpcaculator.listOfpopvcfRecsmapByAChr[vcfobj_idx][currentchrID] = vcfobj.getVcfListByChrom(currentchrID)
-        target_ref_SNPs = variantUtils.alignmultPopSnpPos(obsexpcaculator.listOfpopvcfRecsmapByAChr, "o",None,False)
-        obsexpcaculator.currentchrID = currentchrID
-        if options.typeOfcalculate == "early":
-            obsexpcaculator.dynamicIU_toptable_obj.currentchrLen = currentchrLen
-            obsexpcaculator.alignedSNP_absentinfo = {}
-            obsexpcaculator.alignedSNP_absentinfo[currentchrID] = []
-        ##########
-        print(len(target_ref_SNPs[currentchrID]))
-        if isinstance(currentchrLenOrRegion, tuple):  # bedfile
-            print(currentchrID, currentchrLenOrRegion[0] - extendsize, currentchrLenOrRegion[1] + extendsize)
-            win.slidWindowOverlap(target_ref_SNPs[currentchrID], min(currentchrLenOrRegion[1] + extendsize, currentchrLen), windowWidth, slideSize, obsexpcaculator, max(0, currentchrLenOrRegion[0] - extendsize))
-        else:
-            win.slidWindowOverlap(target_ref_SNPs[currentchrID], currentchrLen, windowWidth, slideSize, obsexpcaculator)
-
-        obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)] = copy.deepcopy(win.winValueL)
+                print(currentchrID, currentchrLenOrRegion[0] - extendsize, currentchrLenOrRegion[1] + extendsize)
+                win.slidWindowOverlap(target_ref_SNPs[currentchrID], min(currentchrLenOrRegion[1] + extendsize, currentchrLen), windowWidth, slideSize, obsexpcaculator, max(0, currentchrLenOrRegion[0] - extendsize))
+            else:
+                win.slidWindowOverlap(target_ref_SNPs[currentchrID], currentchrLen, windowWidth, slideSize, obsexpcaculator)
+    
+            obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)] = copy.deepcopy(win.winValueL)
+        except Exception as e:
+            print(e)
+            variantUtils.pickle.dump(win.winValueL,open("breakrescue", 'wb'))
 
     
     for currentchrID, currentchrLenOrRegion in chromlistOrBedRegionList:

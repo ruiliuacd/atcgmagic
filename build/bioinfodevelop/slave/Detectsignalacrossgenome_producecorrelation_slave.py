@@ -117,7 +117,7 @@ def make_freq_xaxisKEY_yaxisseqVALUERelation(a):
             try:
                 ancestrallcontext=snp[0][4].strip()[0].upper()+snp[0][3+A_base_idx*2].strip().upper()+snp[0][4].strip()[2].upper()
             except Exception as e:
-                print(f"error catched: {e}",snp)
+                print(f"error catched: {e}",snp,snp_aligned)
                 continue
             if "CG" in ancestrallcontext or "GC" in ancestrallcontext:
 #                 print("skip CG site",ancestrallcontext)
