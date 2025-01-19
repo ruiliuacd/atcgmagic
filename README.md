@@ -3,11 +3,12 @@
 export PYTHONPATH=/path/to/atcgtoolkit/build:$PYTHONPATH
 export PYTHON=/path/to/atcgtoolkit/build/bioinfodevelop:$PYTHONPATH
 chmod +x atcgtools
-run directly:
-atcgtools -h
-or 
-python atcgtools.py [analysistype]
 
+atcgtools [analysistype] -h
+or 
+python atcgtools.py [analysistype] -h
+
+run different module functions:
 
 atcgtools [analysistype] [parameters for different analysistype]
 
@@ -17,6 +18,7 @@ atcgtools [analysistype] [parameters for different analysistype]
  Convert vcf into which format depands on -f. 
  -f=	
  pedmap (default): produce .map and .ped file of plink format (if -r is proviede, final map ped file only contian unlinked sites that r2 less than value -r assigned )
+ 		pedmap1 produce loose format plink format.	
  genosnp: output .geno file also called EIGENSTRST format, .snp and .ind file. 
  	 .geno file contains 1 line per position. Each line contains 1 character per individual:
  	 	0 means zero copies of reference allele
@@ -44,7 +46,7 @@ atcgtools [analysistype] [parameters for different analysistype]
  
  -i optional. Conflict with -r.
  
- -m group information file. 
+ -m group information file. necessary when -f genosnp
  	
   	# in above example, all8popfile.indpop file contain three essential columns and could with additional columns to group differently. the second argument of -m specifies  which column to use as the group info.
   	#otherspecies_commonteal_fh_u5_56        U       otherspecies    otherspecies
@@ -58,6 +60,8 @@ atcgtools [analysistype] [parameters for different analysistype]
  -t optional. Specifies how many chromosomes will be processed simultaneously using multiple processes. Better assign as many as possible to get results faster.
  
  -c optional. if provided, the out put's chromosome ID will be replace by the corresponding name according this file.
+ 
+ -C specific chromosomes IDs. optional. [-C ...] multiple -C for multiple chromosomes IDs respectively. 
  
  -o output file prefix name
  	
@@ -91,18 +95,21 @@ atcgtools [analysistype] [parameters for different analysistype]
  Detectsignalacrossgenome:
  
  -p assign which signal to calculate in sliding window, the corresponding calculation program were implemented in subclasses Calculate_popPI,Calculate_popDiv,Calculate_Fst,Calculate_ABB_BAB_BBAA,Calculate_df,Calculate_Hp_master_slave,Calculate_S_ObsExp_difference.
- 	used to calculate pi, dxy/ Fst/ABBABAAB/  df(fixed different)/ Hp/ seletion in ,for example, ancient wild population after divergence from domestic lineage(SDS), respectively.
+ 	Different'subclass' instances of Calculator were implemented to calculate statistics:pi, dxy/ Fst/ABBABAAB/  df(fixed different)/ Hp/ seletion in ,for example, ancient wild population after divergence from domestic lineage(SDS), respectively.
 
 	
 	e.g. atcgtools Detectsignalacrossgenome -T spotbilled.VCFBAMconfig -T configfiles/mallardZJU1.VCFBAMconfig -o EarlyseletedRegion_auto -R configfiles/beijing.VCFBAMconfig -R configfiles/shaoxing.VCFBAMconfig -R configfiles/newdomesticbreeds.VCFBAMconfig -R configfiles/gy.VCFBAMconfig -R configfiles/sm.VCFBAMconfig -R configfiles/jd.VCFBAMconfig -R configfiles/cv.VCFBAMconfig -R configfiles/campbell.VCFBAMconfig -n 24 -p early -t toplevelDuck_ZJU1ref -w 20000 -s 10000 -1 build/bioinfodevelop/slave/Detectsignalacrossgenome_producecorrelation_slave.py -2 build/bioinfodevelop/slave/Detectsignalacrossgenome_slidewin_slave.py -c auto
 
  VCataAnno:
+ 
 	Along with extracting protein-coding genes from the genome.fa and translating them into amino acid sequences according the GTF file, the diallele variants will be annotated based on their locations in CDS/UTR/intron/intergenic region respectively and output into different files. 
 	
 	
 	Our program specially take overlaped genes into consideration. e.g, 
 	atcgtools VCataAnno -V wildchr1.vcf -r ZJU1/bjduckallchr.fna -g ZJU1/genomic.gtf -o duckpop/variantanno/ -c ZJU1duckchrominfo -m 80000 -5 3000 -3 3000
-	the .cds outfile contain those variants that locate in CDS regions, when overlaped transcripts exist, the output will be like this:
+	
+	Above command output .cds/.intron/.utr/.intergenic/.mutcds/.mutaa/.refaa outfiles
+	The .cds outfile contain those variants that locate in CDS regions, when overlaped transcripts exist, the output will be like this:
 	#CHROM  POS     REF     ALT     trscptID        geneName  strand  cdsidx  refcodon        refaa   altcodon        altaa   INFO    FORMAT  mallard_SRR6323906      mallard_SRR6323939      mallard_SRR7091422   ... [all samples same as vcf's samples columns]
 	1	26118287	A	G	XM_038179863.1;XM_038179877.1;XM_038179871.1;XM_038179885.1;XM_038179867.1;XM_038179893.1	CFTR;CFTR;CFTR;CFTR;CFTR;CFTR	-;-;-;-;-;-	5;3;3;3;3;2	ttg;ttg;ttg;ttg;ttg;ttg	L;L;L;L;L;L	ctg;ctg;ctg;ctg;ctg;ctg	L;L;L;L;L;L	AC=1;AF=0.017;AN=58;BaseQRankSum=-0.363;DP=401;ExcessHet=0.0000;FS=0.000;InbreedingCoeff=-0.0241;MLEAC=1;MLEAF=0.017;MQ=60.00;MQRankSum=0.000;QD=18.56;ReadPosRankSum=-1.880;SOR=0.507	GT:AD:DP:GQ:PL	['0/0:10,0:10:30:0,30,450', '0/0:6,0:6:18:0,18,260',  omit...]
 	1	26118332	G	A	XM_038179863.1;XM_038179877.1;XM_038179871.1;XM_038179885.1;XM_038179867.1;XM_038179893.1	CFTR;CFTR;CFTR;CFTR;CFTR;CFTR	-;-;-;-;-;-	5;3;3;3;3;2	cta;cta;cta;cta;cta;cta	L;L;L;L;L;L	tta;tta;tta;tta;tta;tta	L;L;L;L;L;L	AC=38;AF=0.655;AN=58;BaseQRankSum=-0.369;DP=402;ExcessHet=2.5144;FS=11.193;InbreedingCoeff=-0.0625;MLEAC=38;MLEAF=0.655;MQ=60.00;MQRankSum=0.000;QD=33.73;ReadPosRankSum=-0.681;SOR=0.605	GT:AD:DP:GQ:PL	['1/1:0,13:13:39:570,39,0', '1/1:0,7:7:21:260,21,0', omit...]
@@ -117,7 +124,7 @@ atcgtools [analysistype] [parameters for different analysistype]
 	1	26159857	T	C	XM_027457737.2;XM_038179909.1;XM_038179905.1	ASZ1;ASZ1;ASZ1	+;+;+	1;1;1	gat;gat;gat	D;D;D	gac;gac;gac	D;D;D	AC=19;AF=0.365;AN=52;BaseQRankSum=1.580;DP=165;ExcessHet=0.7722;FS=1.019;InbreedingCoeff=-0.0781;MLEAC=19;MLEAF=0.365;MQ=60.00;MQRankSum=0.000;QD=17.78;ReadPosRankSum=1.089;SOR=0.947	GT:AD:DP:GQ:PL	['0/1:2,4:6:72:162,0,72', '0/0:8,0:8:24:0,24,303', omit...]
 	1	26159878	C	T	XM_027457737.2;XM_038179909.1;XM_038179905.1	ASZ1;ASZ1;ASZ1	+;+;+	1;1;1	ggc;ggc;ggc	G;G;G	ggt;ggt;ggt	G;G;G	AC=9;AF=0.173;AN=52;BaseQRankSum=-0.265;DP=182;ExcessHet=0.6065;FS=1.680;InbreedingCoeff=0.0620;MLEAC=10;MLEAF=0.192;MQ=60.00;MQRankSum=0.000;QD=18.38;ReadPosRankSum=1.340;SOR=0.366	GT:AD:DP:GQ:PL	['0/1:2,4:6:72:115,0,72', '0/0:6,0:6:18:0,18,244', omit...]
 	
-	and the same for .intron outfile
+	and similar for .intron outfile
 	
 	
 -c assign a mysql table (ZJU1duckchrominfo in example) containning chrID and chrlength in first two coloumn.
@@ -127,4 +134,17 @@ atcgtools [analysistype] [parameters for different analysistype]
 -5/-3 define how long the extending nearby regions output the variants to .utr outfile. When a transcript without UTR ahead/after the first/end codon (not necessary to be M/*) in GTF file, collect variants between -5/-3 distance to the first/end codon as 5UTR or 3UTR, respectively, output to .utr file. Otherwise, any side of UTR exist, the corresponding -5/-3 parameter defined UTR is not used.
 	the inter-regions between interrupted UTR will also output to .utr outfile with different tag.
 	
-It's not optimized to speed up so far.
+It's not optimized to speed up so far, So extremely slow for the whole genome. Use regioned vcf file for efficiency.
+
+Additional:
+basically, python analysisAppEntry/toolkit/calculateLDUsePlinkForScaffold.py repeatly extract vcf records for every chromosome and transfer into .map/.ped file and then revoke plink to use all SNPs in the file to produce a plink_part[i].ld file.
+e.g. plink_part1.ld plink_part2.ld ...... plink_part7897.ld
+then one can use 
+binld.py -d plink_partmyNtosub.ld 2 5 1 7897 -i 0 500000 100 -m 7 -o outnamepre
+to repeatly collect above plink_part1.ld ~ plink_part7897.ld one by one into bins that assigned by -i, according to value of column 2 - column 5 . The 7th column's value for each bin will be averaged. 
+
+python ./build/bioinfodevelop/analysisAppEntry/toolkit/testmakemht_hist.py -n ancientselectionsignal_auto_sp_ma_be_sh_ne_gy_sm_jd_cv_ca.earlypostiveselected.zscorefile20000_1000088 -0.3_picturetitle outfilename -X winvalue -u 1000 -d 1000 -w 20000 -s 10000 -N 1 -o multipleMhtInOne_outfilenameprefix
+to run testmakemht_hist.py to drawpicture, you may need to install rpy2 and some R packages to ./com./Rpackages first, e.g.
+R CMD INSTALL  -l ./com/Rpackages/ ./com/Rpackages/gap_1.1-3.tar.gz
+textshaping, ragg
+and adjuest r('.libPaths("...../com/Rpackages")') acorrdingly.

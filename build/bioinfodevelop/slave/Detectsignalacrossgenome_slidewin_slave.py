@@ -25,6 +25,7 @@ parser.add_option("-m", "--masterpid", dest="masterpid")
 parser.add_option("-b", "--bedlikefile", dest="bedlikefile", help="conflict with -c ")
 (options, args) = parser.parse_args()
 mindeptojudgefix = 20  # for pool only
+minSNPs=1
 extendsize = 500000
 windowWidth = int(options.winwidth)
 slideSize = int(options.slideSize)
@@ -61,8 +62,8 @@ if __name__ == '__main__':
         obsexpcaculator.dynamicIU_toptable_obj = dynamicIU_toptable_obj
         obsexpcaculator.flankseqfafile = open(flankseqfafilename, "w")
         plainname = re.search(r"[^/]*$", obsexpcaculator.outputname).group(0)
-        if len(plainname) >= 250:
-            obsexpcaculator.outputname = obsexpcaculator.outputname[:-(len(plainname) - 250)]
+        if len(plainname) >= 228:
+            obsexpcaculator.outputname = obsexpcaculator.outputname[:-(len(plainname) - 228)]
         outputname = obsexpcaculator.outputname
         outfile = open(outputname + "." + options.typeOfcalculate + str(windowWidth) + "_" + str(slideSize) + str(os.getpid()) + chrlistfilewithoutpath, 'w')
         print("chrNo\twinNo\tfirstsnppos\tlastsnppos\tnoofsnp\twinvalue\tzvalue", file=outfile)
@@ -87,8 +88,8 @@ if __name__ == '__main__':
 #         obsexpcaculator = Caculators.Caculate_pairFst(mindeptojudgefix, options.targetpopvcfconfig, options.refpopvcffileconfig)
         obsexpcaculator = Calculators.Calculate_popDiv("no",options.targetpopvcfconfig, options.refpopvcffileconfig,options.outfileprewithpath)
         plainname = re.search(r"[^/]*$", obsexpcaculator.outputname).group(0)
-        if len(plainname) >= 250:
-            outputname = obsexpcaculator.outputname[:-(len(plainname) - 250)]
+        if len(plainname) >= 228:
+            outputname = obsexpcaculator.outputname[:-(len(plainname) - 228)]
         outputname = obsexpcaculator.outputname
         outfile = open(outputname + "." + options.typeOfcalculate + str(windowWidth) + "_" + str(slideSize) + str(os.getpid()) + chrlistfilewithoutpath, 'w')
         print("chrNo\twinNo\tfirstsnppos\tlastsnppos\tnoofsnp\twinvalue\tzvalue", file=outfile)
@@ -96,28 +97,30 @@ if __name__ == '__main__':
     elif options.typeOfcalculate == "is":
         obsexpcaculator = Calculators.Calculate_IS(mindeptojudgefix / 2, options.targetpopvcfconfig, options.refpopvcffileconfig)
         plainname = re.search(r"[^/]*$", options.outfileprewithpath).group(0)
-        if len(plainname) >= 250:
-            outputname = options.outfileprewithpath[:-(len(plainname) - 250)]
+        if len(plainname) >= 228:
+            outputname = options.outfileprewithpath[:-(len(plainname) - 228)]
         outputname = options.outfileprewithpath
         outfile = open(outputname + "." + options.typeOfcalculate + str(windowWidth) + "_" + str(slideSize) + str(os.getpid()) + chrlistfilewithoutpath, 'w')
         print("chrNo\twinNo\tfirstsnppos\tlastsnppos", *obsexpcaculator.vcfname_combination, sep="\t", file=outfile)
     elif options.typeOfcalculate == "hp" or options.typeOfcalculate == "pi":
         obsexpcaculator = Calculators.Calculate_Hp_master_slave(options.targetpopvcfconfig, options.outfileprewithpath, minsnps=0) if options.typeOfcalculate == "hp" else Calculators.Calculate_popPI(options.targetpopvcfconfig, options.outfileprewithpath, minsnps=0)
         plainname = re.search(r"[^/]*$", options.outfileprewithpath).group(0)
-        if len(plainname) >= 250:
-            outputname = options.outfileprewithpath[:-(len(plainname) - 250)]
+        if len(plainname) >= 228:
+            outputname = options.outfileprewithpath[:-(len(plainname) - 228)]
         outputname = options.outfileprewithpath
         outfile = open(outputname + "." + options.typeOfcalculate + str(windowWidth) + "_" + str(slideSize) + str(os.getpid()) + chrlistfilewithoutpath, 'w')
         print("chrNo\twinNo\tfirstsnppos\tlastsnppos\tnoofsnp\twinvalue\tzvalue", file=outfile)
     
     if options.bedlikefile != None:
-        obsexpcaculator.minsnps = 7
+        obsexpcaculator.minsnps = minSNPs#7
     elif options.chromlistfilename != None:
-        obsexpcaculator.minsnps = 10
-    aaaa = open(options.outfileprewithpath + ".slidwin_filelist" + options.masterpid, 'a')
-    print(outputname + "." + options.typeOfcalculate + str(windowWidth) + "_" + str(slideSize) + str(os.getpid()) + chrlistfilewithoutpath, file=aaaa)
-    aaaa.close()
+        obsexpcaculator.minsnps = minSNPs#8
+    # aaaa = open(options.outfileprewithpath + ".slidwin_filelist" + options.masterpid, 'a')
+    Utils.safe_write(options.outfileprewithpath + ".slidwin_filelist" + options.masterpid,outputname + "." + options.typeOfcalculate + str(windowWidth) + "_" + str(slideSize) + str(os.getpid()) + chrlistfilewithoutpath)
+    # print(outputname + "." + options.typeOfcalculate + str(windowWidth) + "_" + str(slideSize) + str(os.getpid()) + chrlistfilewithoutpath, file=aaaa)
+    # aaaa.close()
     win = Utils.Window()
+    win.outfilehandle=open(outputname + "." + options.typeOfcalculate + str(windowWidth) + "_" + str(slideSize) + str(os.getpid()) + chrlistfilewithoutpath+"_log",'w')
     obsexpsignalmapbychrom = {}
     if options.bedlikefile != None :genomedbtools = dbm.DBTools(config.ip, config.username, config.password, config.genomeinfodbname);mysqlchromtable = config.pekingduckchromtable
     
@@ -189,7 +192,8 @@ if __name__ == '__main__':
             for i in range(len(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)])):
                 if options.typeOfcalculate == "early" or options.typeOfcalculate=="D":
                     try:
-                        print(currentchrID,"winvalue is the correct value,zvalue is the not very appropriate value I used before",obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i],type(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][3][0]),type(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][3][1]))
+                        if i==0:#print log
+                            print(currentchrID,"winvalue is the correct value,zvalue is the not very appropriate value I used before",obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i],type(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][3][0]),type(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][3][1]))
                         print(currentchrID + "\t" + str(i) + "\t" + str(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][0]) + "\t" + str(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][1]) + "\t" + str(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][2]) + "\t" + '%.15f' % (obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][3][0]) + "\t" + '%.12f' % (obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][3][1]), file=outfile)
                     except :
                         print(currentchrID + "\t" + str(i) + "\t" + str(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][0]) + "\t" + str(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][1]) + "\t" + str(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][2]) + "\t" + obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][3][0] + "\t" + obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][3][1], file=outfile)
@@ -207,7 +211,7 @@ if __name__ == '__main__':
                     except:
                         print(currentchrID + "\t" + str(i) + "\t" + str(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][0]) + "\t" + str(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][1]) + "\t" + str(obsexpsignalmapbychrom[(currentchrID, currentchrLenOrRegion)][i][2]) + "\t" + 'NA' + "\t0" , file=outfile)
     outfile.close()
-    
+    win.outfilehandle.close()
     if options.topleveltablejudgeancestral != None:
         dbvariantstools.disconnect()
 #     genomedbtools.disconnect()

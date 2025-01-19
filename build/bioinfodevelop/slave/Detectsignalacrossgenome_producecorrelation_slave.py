@@ -19,11 +19,11 @@ parser.add_option("-c","--chromlistfilename",dest="chromlistfilename")
 parser.add_option("-n","--numberofindvdoftargetpop_todividintobin",dest="numberofindvdoftargetpop_todividintobin",default="o",help="conflit with correlationfile")
 parser.add_option("-o","--outfileprewithpath",dest="outfileprewithpath")
 (options, args) = parser.parse_args()
-mindepthtojudefixed=20
+globalMindepthtojudefixed=20
 seqerrorrate=0.008;outgroupidx_in_topleveltable=[8,10]#outgidx=7;outg2idx=9
 def make_freq_xaxisKEY_yaxisseqVALUERelation(a):
     chromlistfilename=a[0];topleveltablename=a[1];targetpopvcffile_withdepthconfig=a[2];refpopvcffile_withdepthconfig=a[3];numberofindvdoftargetpop_todividintobin=int(a[4])
-    mindepthtojudefixed=mindepthtojudefixed
+    mindepthtojudefixed=globalMindepthtojudefixed
     d_increase=fractions.Fraction(1, (2*int(numberofindvdoftargetpop_todividintobin)))
     d_increase=round(d_increase,11)
     minvalue=0.000000000000
@@ -226,18 +226,18 @@ def make_freq_xaxisKEY_yaxisseqVALUERelation(a):
     print("process ID:",os.getpid(),"done")
     return copy.deepcopy(freq_xaxisKEY_yaxisVALUE_seq_list)
 if __name__ == '__main__':
-    filenamelistfilename=options.outfileprewithpath+".freqcorrelationfilenamelist"
     parameterstuples=(options.chromlistfilename,options.topleveltablejudgeancestral,options.targetpopvcfconfig,options.refpopvcffileconfig,options.numberofindvdoftargetpop_todividintobin)
     print(parameterstuples,options.outfileprewithpath)
     freq_xaxisKEY_yaxisVALUE_seq_list=make_freq_xaxisKEY_yaxisseqVALUERelation(parameterstuples)
     outfilename=options.outfileprewithpath+"_part_"+str(os.getpid())+config.random_str()
     outfile=open(outfilename,'w')
-    filenamelistfile=open(filenamelistfilename,'a')
+    # filenamelistfile=open(filenamelistfilename,'a')
     for a,b in sorted(freq_xaxisKEY_yaxisVALUE_seq_list.keys()):
         print(str(a),str(b),*freq_xaxisKEY_yaxisVALUE_seq_list[(a,b)],sep="\t",file=outfile)
     outfile.close()
-    print(outfilename,file=filenamelistfile)
+    Utils.safe_write(options.outfileprewithpath+".freqcorrelationfilenamelist",outfilename)
+    # print(outfilename,file=filenamelistfile)
     print(sys.argv,outfilename)
-    filenamelistfile.close()
+    # filenamelistfile.close()
     print("process ID:",os.getpid(),"finished")
     exit(0)
