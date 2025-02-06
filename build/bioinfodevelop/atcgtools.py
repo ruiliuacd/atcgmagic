@@ -4,6 +4,9 @@ Created on 2024年8月24日
 
 @author: pc
 '''
+import concurrent.futures
+import  os,re,argparse,pickle,time
+
 print("""
 *******************************************************************
 * atcgtools
@@ -13,9 +16,8 @@ print("""
 * Please report bugs to Rui Liu <ruiliugenetic@nwu.edu.cn>
 *******************************************************************
 
-""")
-import concurrent.futures
-import  os,re,argparse,pickle#,time
+""",time.asctime( time.localtime(time.time()) ))
+
 from bioinfodevelop.analysisUtils.genomeUtils import store_sequence,count_gap
 from bioinfodevelop.analysisAppEntry.toolkit import CatalogSNP_withaaseq_cdsseq
 from bioinfodevelop.analysisUtils import variantUtils
@@ -287,7 +289,7 @@ if __name__ == '__main__':
         if options.outfmt=="genosnp" :
             Vcf2Pedrandomdilut_Wapper=Vcf2geno_Wapper#variantUtils.VCF_Data.Vcf2geno_snp_ind
             chromchangemap['all']='all'#when vcfobj_l if vcffile's name. i.e. real vcfFileName
-        elif  options.outfmt=="pedmap":
+        elif "pedmap" in options.outfmt or options.outfmt=="pedmap1":
             print("assign convert_Wapper of Vcf 2 outformat")
         else:
             print("wrong outfmt, use default pedmap")
@@ -319,7 +321,7 @@ if __name__ == '__main__':
                 #     cchrom,mapped=rest_queue.get()
                 #     print("merge",cchrom)
                 #     total_result=mergeMapPed(total_result, mapped)
-        if options.outfmt=="pedmap":
+        if "pedmap" in options.outfmt:
             if options.r2:
                 for fn in rest_list:
                     if not fn or (not os.path.exists(fn+".map")):continue
@@ -341,7 +343,7 @@ if __name__ == '__main__':
                     idx+=1
                 # rest_list=[mapped for mapped in rest_list if mapped]
                 # total_result= reduce(mergeMapPed,[total_result]+rest_list)
-            printmode="tight"#'normal'
+            printmode="tight" if "pedmap"==options.outfmt else 'normal'
             variantUtils.VCF_Data.printpedmap(options.outputpre,total_result,printmode)
         elif options.outfmt=="genosnp":
             totalgeno=open(options.outputpre+".geno",'w')

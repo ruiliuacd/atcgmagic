@@ -8,7 +8,7 @@ print("""
 *******************************************************************
 * atcgtools
 * version v0.1 Linux
-* Built at Nov 15 2024 21:14:25, by pysam0.19, py3.6
+* Built at Nov 15 2024 21:14:25, with pysam0.16, py3.6
 * (C) 2024-present, Liu Lab, x University
 * Please report bugs to Rui Liu <ruiliugenetic@nwu.edu.cn>
 *******************************************************************
@@ -271,7 +271,7 @@ if __name__ == '__main__':
             if configN.lower().endswith(".vcf") and len(options.VCFBAMconfig)==1:
                 vcfobj_l.append(variantUtils.VCF_Data(configN))
             else:#VCFBAMconfig
-                vcfFname,vcfobj_BAMnamesVALUE=variantUtils.parseVCFBAMconfig(configN, 'n')
+                vcfFname,vcfobj_BAMnamesVALUE=variantUtils.parseVCFBAMconfig(configN, opensam='n')
                 vcfobj_l.append(vcfobj_BAMnamesVALUE[0])#variantUtils.VCF_Data(vcfFname)
             titlelist.append(vcfobj_l[-1].VcfIndexMap['title'])#same order as the concatnate title ordered by vcfobj_l
             if len(options.VCFBAMconfig)>1:vcf_aligned[vcfFname]=[len(vcfobj_l[-1].VcfIndexMap['title'])-9,tuple(vcfobj_BAMnamesVALUE[1:])]  #else None
