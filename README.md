@@ -43,7 +43,6 @@ atcgtools [analysistype] [parameters for different analysistype]
   	 python atcgtools.py VJtransf -v mpl.VCFBAMconfig  -v newdomesticbreeds.VCFBAMconfig -v shaoxing.VCFBAMconfig  -v mallard.VCFBAMconfig -v spotbilled.VCFBAMconfig -v beijing.VCFBAMconfig -v ZJU1.VCFBAMconfig [-C NC_051772.1] -o align7vcffileNC_051772withZJU1 -t 8 -f pedmap [-c chrnameMap.txt][-r ...]
   	 # VCFBAMconfig file's first line 'vcffile=xxxx' specify the vcf file used to align with others. The sam/bam files used to calling this vcf should list in the following lines. Those bam files will be used to judge whether an absence in a vcf file is due to it fixed as reference or no coverage for the aligned site. 
   	 Different suffix names .vcf or .VCFBAMconfig enable different behaviours correspondingly. when multiple -v is used, should use .VCFBAMconfig as input as it is nesscery to align records.
-```
 	
  -r optional. Conflict with -i. If provided, the output will filter out those linked sites by invoking plink --indep-pairwise 100(default) 20(default) 0.5
  
