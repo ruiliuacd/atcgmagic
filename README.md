@@ -50,15 +50,17 @@ atcgtools [analysistype] [parameters for different analysistype]
  
  -m group information file. necessary when -f genosnp
  	
-  	 # in above example, all8popfile.indpop file contain three essential columns and could with additional columns to group differently. the second argument of -m specifies  which column to use as the group info.
-  	 otherspecies_commonteal_fh_u5_56        U       otherspecies    otherspecies
-  	 otherspecies_commonteal_pylake_u2_53    U       otherspecies    otherspecies
-  	 otherspecies_falcatedteal_fh_u4_55      U       otherspecies    otherspecies
-  	 otherspecies_gadwall_fh_f7_7    F       otherspecies    otherspecies
-  	 shaoxing_SRR6323890     U       shaoxing        domestic
-  	 shaoxing_SRR6323918     U       shaoxing        domestic
-  	 beijing_41224_42        U       beijing domestic
-  	 beijing_41288_44        U       beijing domestic
+    
+ 	# in above example, all8popfile.indpop file contain three essential columns and could with additional columns to group differently. the second argument of -m specifies  which column to use as the group info.
+ 	otherspecies_commonteal_fh_u5_56        U       otherspecies    otherspecies
+ 	otherspecies_commonteal_pylake_u2_53    U       otherspecies    otherspecies
+ 	otherspecies_falcatedteal_fh_u4_55      U       otherspecies    otherspecies
+ 	otherspecies_gadwall_fh_f7_7    F       otherspecies    otherspecies
+ 	shaoxing_SRR6323890     U       shaoxing        domestic
+ 	shaoxing_SRR6323918     U       shaoxing        domestic
+ 	beijing_41224_42        U       beijing domestic
+ 	beijing_41288_44        U       beijing domestic
+    
  -t optional. Specifies how many chromosomes will be processed simultaneously using multiple processes. Better assign as many as possible to get results faster.
  
  -c optional. if provided, the out put's chromosome ID will be replace by the corresponding name according this file.
@@ -82,10 +84,12 @@ atcgtools [analysistype] [parameters for different analysistype]
  'ref_allele' corresponding the 4th(REF) col of the input vcf file and 'context' contain the flank bases of both side of the SNP, empty for INDEL.
  'alt_alle1' conrresponding to the first allele of the 5th(ALT) of the input vcf file and the rest alternated allele will be stored in 'alt_alleN' col.
  'presenceflag' is paticularly noteworthy. It's a two bits flag. from right(least significant bit) to left, every to bits represent the variant state of the corresponding population,which is assigned in config.propoties file.
+ 	
+ 	
  	00 the SNP site is not covered in this population samples
-    01 fixed as reference allele
-    10 fixed as alternate allele
-    11 SNP
+ 	01 fixed as reference allele
+ 	10 fixed as alternate allele
+ 	11 SNP
     
  As the SNPs will vary when different populations/individuals used to call, the input vcf here better use as comprehensive an individual/population set as possible. 
  Whereas  joint calling on too many individuals/populations can be extremely time consuming, so our solutions consists of two aspects:
@@ -117,12 +121,10 @@ atcgtools [analysistype] [parameters for different analysistype]
   	 e.g. atcgtools Detectsignalacrossgenome -T spotbilled.VCFBAMconfig -T configfiles/mallardZJU1.VCFBAMconfig -o EarlyseletedRegion_auto -R configfiles/beijing.VCFBAMconfig -R configfiles/shaoxing.VCFBAMconfig -R configfiles/newdomesticbreeds.VCFBAMconfig -R configfiles/gy.VCFBAMconfig -R configfiles/sm.VCFBAMconfig -R configfiles/jd.VCFBAMconfig -R configfiles/cv.VCFBAMconfig -R configfiles/campbell.VCFBAMconfig -n 24 -p early -t toplevelDuck_ZJU1ref -w 20000 -s 10000 -1 build/bioinfodevelop/slave/Detectsignalacrossgenome_producecorrelation_slave.py -2 build/bioinfodevelop/slave/Detectsignalacrossgenome_slidewin_slave.py -c auto
 
  VCataAnno:
- 
--	Along with extracting protein-coding genes from the genome.fa and translating them into amino acid sequences according the GTF file, the diallele variants will be annotated based on their locations in CDS/UTR/intron/intergenic region respectively and output into different files. 
-	Our program specially take overlaped genes into consideration. e.g,
+ Along with extracting protein-coding genes from the genome.fa and translating them into amino acid sequences according the GTF file, the diallele variants will be annotated based on their locations in CDS/UTR/intron/intergenic region respectively and output into different files.
+ Our program specially take overlaped genes into consideration. e.g,
 	
     
-  	 Our program specially take overlaped genes into consideration. e.g, 
   	 atcgtools VCataAnno -V wildchr1.vcf -r ZJU1/bjduckallchr.fna -g ZJU1/genomic.gtf -o duckpop/variantanno/ -c ZJU1duckchrominfo -m 80000 -5 3000 -3 3000
 	
   	 Above command output .cds/.intron/.utr/.intergenic/.mutcds/.mutaa/.refaa outfiles
