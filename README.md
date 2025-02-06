@@ -21,7 +21,7 @@ atcgtools [analysistype] [parameters for different analysistype]
  		pedmap1 produce loose format plink format.	
  genosnp: output .geno file also called EIGENSTRST format, .snp and .ind file. 
  	 
-     - .geno file contains 1 line per position. Each line contains 1 character per individual:
+      .geno file contains 1 line per position. Each line contains 1 character per individual:
  	 	0 means zero copies of reference allele
  	 	1 means one copy of reference allele.
  	 	2 means two copies of reference allele.
