@@ -78,12 +78,12 @@ atcgtools [analysistype] [parameters for different analysistype]
  
  inittopleveltable:
  
-- Create the toplevel variants table for a species and load SNP/INDEL records of allindividuals.vcf into the table.
+ Create the toplevel variants table for a species and load SNP/INDEL records of allindividuals.vcf into the table.
  After this step, toplevel talbe in mysql databases contain the following fields:
  chrID,snp_pos,snpID,ref_allele,context,alt_alle1,alt_alleN,presenceflag
  'ref_allele' corresponding the 4th(REF) col of the input vcf file and 'context' contain the flank bases of both side of the SNP, empty for INDEL.
  'alt_alle1' conrresponding to the first allele of the 5th(ALT) of the input vcf file and the rest alternated allele will be stored in 'alt_alleN' col.
- 'presenceflag' is paticularly noteworthy. It's a two bits flag. from right(least significant bit) to left, every to bits represent the variant state of the corresponding population,which is assigned in config.propoties file.
+ 'presenceflag' is paticularly noteworthy. It's a two bits flag, from right(least significant bit) to left, every two bits represent the variant state of the corresponding population,which is assigned in config.propoties file.
  	
  	
  	00 the SNP site is not covered in this population samples
@@ -91,10 +91,9 @@ atcgtools [analysistype] [parameters for different analysistype]
  	10 fixed as alternate allele
  	11 SNP
     
- As the SNPs will vary when different populations/individuals used to call, the input vcf here better use as comprehensive an individual/population set as possible. 
- Whereas  joint calling on too many individuals/populations can be extremely time consuming, so our solutions consists of two aspects:
+ As the SNPs will vary when different populations/individuals used to call, the input vcf here better use as comprehensive an individual/population set as possible. Whereas joint calling on too many individuals/populations can be extremely time consuming, so our solutions consists of two aspects:
  1) temporarily, using a vcf ,e.g. one population vcf file, file contains as comprehensive SNPs as possible. Then in following analyses programs,which using different vcf files including additional variant records, could add new records to the toplevel table and fill their outgroup info(as next step).
- 2) run any type of anaysis that will joint multiple vcf files would invoke alignmultPopSnpPos(...,jointmode="i"/"o"/"l",...) function inside.
+ 2) run any type of anaysis that would joint multiple vcf files by invoking alignmultPopSnpPos(...,jointmode="i"/"o"/"l",...) function inside.
  	This function joint the variant records from all input VCF files in three modes according 'jointmode' parameter:
 	
 	1. i (inner join): only retain the variants records that all combined populations have and have the same alleles.
@@ -103,24 +102,37 @@ atcgtools [analysistype] [parameters for different analysistype]
 
 	3. l (left join): as long as the ‘selected population’, referred as ‘ref-pop’, has the variants, then retain this variants and if any of the other populations’ VCF don’t have this records then search BAM file for depth information as 2.
 	
- alignmultPopSnpPos() functon return the joint records and can be output in any format (vcf/pedmap/genosnp), and will automaticlly update the toplevel variants table filling new records and update presenceflag, context, outgroup info and all fields.
+ alignmultPopSnpPos() functon return the joint records of all input vcfs and can be output in any format (vcf/pedmap/genosnp), and will automaticlly update the toplevel variants table filling new records and update presenceflag, context, outgroup info and all fields.
+ The 'presenceflag' will be set (through alterDB() function) for all SNPs for corresponding populations when alignmultPopSnpPos() function is called. For example, the after above command #1 or VJgendadi, this presenseflag will be filled as instructure of config.properties file. And the 'presenceflag' for a population/group would be re-set when some analysis include new vcf files of this population/group:
+ 	e.g.
+ 	old presenceflag | presenceflage for this vcf
+    00 | 00	=	00
+    00 | 01	=	01
+    01 | 01	=	01
+    10 | 01	=	11
+    11 | 01	=	11
     
- After the two steps, the presenseflag still empty. It will be set when the assigned vcf files to be used in analyses programs through instance of class alterPresenceflag_Callback, alterDB() function
- 'presenceflag' will be set (through alterDB() function) for all SNPs for corresponding populations when alignmultPopSnpPos() function is called. For example, the after above command #1 or VJgendadi, this presenseflag will be filled as instructure of config.properties file. as the commands all called alignmultPopSnpPos()
+ One can also leave the 'presenseflag' unchanged, by seting 'callback' parameter to be None. Otherwise use a instance of class alterPresenceflag_Callback to set this mysql table field.
 
- fillcontextNoutgroup
+
+ fillcontextNoutgroup:
+ with '-r Reference_genome_file.fa flanksequence_length' provided to fill 'context' column of toplevel mysql table by extracting flank seqs from Reference_genome_file.fa.
+ with '-a xxx.VCFBAMconfig [[-a yyy.VCFBAMconfig]...]' provided to add columns correspondingly in toplevel variants table and fill the depth information for both ref and alt alleles that could serve as archic/outgroup populations to provide ancestral allele information.
  
+ If both -r and -a is provided, do the both.
+ -C chromlistfilename. Required. Provide a file with chromosomes name and range/length each line.
 
 
  Detectsignalacrossgenome:
  
-- -p assign which signal to calculate in sliding window, the corresponding calculation program were implemented in subclasses Calculate_popPI,Calculate_popDiv,Calculate_Fst,Calculate_ABB_BAB_BBAA,Calculate_df,Calculate_Hp_master_slave,Calculate_S_ObsExp_difference.
- 	Different'subclass' instances of Calculator were implemented to calculate statistics:pi, dxy/ Fst/ABBABAAB/  df(fixed different)/ Hp/ seletion in ,for example, ancient wild population after divergence from domestic lineage(SDS), respectively.
+ -p assign which signal to calculate in sliding window, the corresponding calculation program were implemented in subclasses Calculate_popPI,Calculate_popDiv,Calculate_Fst,Calculate_ABB_BAB_BBAA,Calculate_df,Calculate_Hp_master_slave,Calculate_S_ObsExp_difference.
+ Different'subclass' instances of Calculator were implemented to calculate statistics:pi, dxy/ Fst/ABBABAAB/  df(fixed different)/ Hp/ seletion in ,for example, ancient wild population after divergence from domestic lineage(SDS), respectively.
 
 	
   	 e.g. atcgtools Detectsignalacrossgenome -T spotbilled.VCFBAMconfig -T configfiles/mallardZJU1.VCFBAMconfig -o EarlyseletedRegion_auto -R configfiles/beijing.VCFBAMconfig -R configfiles/shaoxing.VCFBAMconfig -R configfiles/newdomesticbreeds.VCFBAMconfig -R configfiles/gy.VCFBAMconfig -R configfiles/sm.VCFBAMconfig -R configfiles/jd.VCFBAMconfig -R configfiles/cv.VCFBAMconfig -R configfiles/campbell.VCFBAMconfig -n 24 -p early -t toplevelDuck_ZJU1ref -w 20000 -s 10000 -1 build/bioinfodevelop/slave/Detectsignalacrossgenome_producecorrelation_slave.py -2 build/bioinfodevelop/slave/Detectsignalacrossgenome_slidewin_slave.py -c auto
 
  VCataAnno:
+ 	
  Along with extracting protein-coding genes from the genome.fa and translating them into amino acid sequences according the GTF file, the diallele variants will be annotated based on their locations in CDS/UTR/intron/intergenic region respectively and output into different files.
  Our program specially take overlaped genes into consideration. e.g,
 	
@@ -173,4 +185,4 @@ When -g ensBiomartGO.table is provided, it will output the GO enrichments result
 ensBiomartGO.table file can be download from ensemble biomart with the following columns:
 Ensembl Gene ID Ensembl Transcript ID   EntrezGene ID   UniProt/TrEMBL Accession        GO Term Accession       GO Term Evidence Code   GO domain       Associated Gene Name    Associated Transcript Name	GO Term Name	...
 
-Note: As our work place greater emphasis on enhencing the continuity of user thought, by providing engineering support that aligns with theories and methodology, rather than focus on improving the speed of program execution, our program may unable run as fast as some other tools that finish similar funtion in minutes. But the hours level for some single steps are also tolerable and could be easy update into high speed as minutes level.
+Note: As our work place greater emphasis on enhencing the continuity of user thought, by providing engineering support that aligns with theories and methodologies, rather than focus on improving the speed of program execution, our program may unable run as fast as some other tools that finish some similar funtions in minutes currently. But the hours-level speed for those single steps are also tolerable and could be easy update into high speed as minutes level.
