@@ -15,7 +15,7 @@ atcgtools [analysistype] [parameters for different analysistype]
 [analysistype]={countgaps,inittopleveltable,fillcontextNoutgroup,VJtransf,VJgendadi,Detectsignalacrossgenome,VCataAnno,test}
  VJtransf：
  
- - Convert vcf into which format depands on -f. 
+ Convert vcf into which format depands on -f. 
  -f=	
  pedmap (default): produce .map and .ped file of plink format (if -r is proviede, final map ped file only contian unlinked sites that r2 less than value -r assigned )
  		pedmap1 produce loose format plink format.	
@@ -103,23 +103,25 @@ atcgtools [analysistype] [parameters for different analysistype]
 	3. l (left join): as long as the ‘selected population’, referred as ‘ref-pop’, has the variants, then retain this variants and if any of the other populations’ VCF don’t have this records then search BAM file for depth information as 2.
 	
  alignmultPopSnpPos() functon return the joint records of all input vcfs and can be output in any format (vcf/pedmap/genosnp), and will automaticlly update the toplevel variants table filling new records and update presenceflag, context, outgroup info and all fields.
- The 'presenceflag' will be set (through alterDB() function) for all SNPs for corresponding populations when alignmultPopSnpPos() function is called. For example, the after above command #1 or VJgendadi, this presenseflag will be filled as instructure of config.properties file. And the 'presenceflag' for a population/group would be re-set when some analysis include new vcf files of this population/group:
- 	e.g.
+ The 'presenceflag' will be set (through alterDB() function) for all SNPs for corresponding populations when alignmultPopSnpPos() function is called. For example, the after above command #1 or VJgendadi, this presenseflag will be filled as instructure of config.properties file. And the 'presenceflag' for a population/group would be re-set when some analysis include new vcf files of this population/group: e.g.
+ 	
+    
  	old presenceflag | presenceflage for this vcf
-    00 | 00	=	00
-    00 | 01	=	01
-    01 | 01	=	01
-    10 | 01	=	11
-    11 | 01	=	11
+ 	00 | 00	=	00
+ 	00 | 01	=	01
+ 	01 | 01	=	01
+ 	10 | 01	=	11
+ 	11 | 01	=	11
     
  One can also leave the 'presenseflag' unchanged, by seting 'callback' parameter to be None. Otherwise use a instance of class alterPresenceflag_Callback to set this mysql table field.
 
 
  fillcontextNoutgroup:
- with '-r Reference_genome_file.fa flanksequence_length' provided to fill 'context' column of toplevel mysql table by extracting flank seqs from Reference_genome_file.fa.
- with '-a xxx.VCFBAMconfig [[-a yyy.VCFBAMconfig]...]' provided to add columns correspondingly in toplevel variants table and fill the depth information for both ref and alt alleles that could serve as archic/outgroup populations to provide ancestral allele information.
  
- If both -r and -a is provided, do the both.
+ With '-r Reference_genome_file.fa flanksequence_length' provided to fill 'context' column of toplevel mysql table by extracting flank seqs from Reference_genome_file.fa.
+ With '-a xxx.VCFBAMconfig [[-a yyy.VCFBAMconfig]...]' provided to add columns correspondingly in toplevel variants table and fill the depth information for both ref and alt alleles that could serve as archic/outgroup populations to provide ancestral allele information.
+ If both -r and -a is provided, do the both. each -a recive one VCFBAMconfig file as value and write/append this file name to config.properties file 'outgroupvcfbamconfig_zju1ref=outgroup1.VCFBAMconfig;outgroup1.VCFBAMconfig;...'. One can also manully write this file and wait for the program automaticlly update the corresponding column info of toplevel table in subsequent analyses process that would invoke dynamicInsertUpdateAncestralContext() function. e.g. VJgendadi, Detectsignalacrossgenome -p early that would use the ancestral infromation.
+ 
  -C chromlistfilename. Required. Provide a file with chromosomes name and range/length each line.
 
 
@@ -167,7 +169,7 @@ atcgtools [analysistype] [parameters for different analysistype]
 	
 It's not optimized to speed up so far, So extremely slow for the whole genome. Use regioned vcf file for efficiency.
 
-#Additional:
+# Additional:
 basically, python analysisAppEntry/toolkit/calculateLDUsePlinkForScaffold.py repeatly extract vcf records for every chromosome and transfer into .map/.ped file and then revoke plink to use all SNPs in the file to produce a plink_part[i].ld file.
 e.g. plink_part1.ld plink_part2.ld ...... plink_part7897.ld
 then one can use 
@@ -186,3 +188,4 @@ ensBiomartGO.table file can be download from ensemble biomart with the following
 Ensembl Gene ID Ensembl Transcript ID   EntrezGene ID   UniProt/TrEMBL Accession        GO Term Accession       GO Term Evidence Code   GO domain       Associated Gene Name    Associated Transcript Name	GO Term Name	...
 
 Note: As our work place greater emphasis on enhencing the continuity of user thought, by providing engineering support that aligns with theories and methodologies, rather than focus on improving the speed of program execution, our program may unable run as fast as some other tools that finish some similar funtions in minutes currently. But the hours-level speed for those single steps are also tolerable and could be easy update into high speed as minutes level.
+ruiliugenetic@nwu.edu.cn
